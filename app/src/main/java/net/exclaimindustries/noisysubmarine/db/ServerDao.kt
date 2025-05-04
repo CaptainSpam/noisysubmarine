@@ -1,0 +1,22 @@
+package net.exclaimindustries.noisysubmarine.db
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+
+/** The DAO for accessing configured servers. */
+@Dao
+interface ServerDao {
+    /** Add a server configuration to the database. */
+    @Insert
+    fun addServer(server: Server)
+
+    /** Delete a server configuration from the database. */
+    @Delete
+    fun deleteServer(server: Server)
+
+    /** Get all the configured servers. */
+    @Query("SELECT * FROM servers")
+    fun getAllServers():List<Server>
+}

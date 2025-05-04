@@ -8,4 +8,8 @@ import androidx.room.TypeConverters
           version = 1)
 @TypeConverters(Converters::class)
 abstract class LibraryDatabase {
+    abstract fun serverDao(): ServerDao
+    abstract fun artistDao(): ArtistDao
+    abstract fun albumDao(): AlbumDao
+    abstract fun songDao(): SongDao
 }
