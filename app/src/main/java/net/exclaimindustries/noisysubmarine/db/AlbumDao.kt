@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 /** The DAO for accessing albums. */
 @Dao
@@ -25,15 +26,15 @@ interface AlbumDao {
 
     /** Count the albums in a server. */
     @Query("SELECT COUNT(*) FROM albums WHERE serverId = :serverId")
-    fun countAlbumsForServer(serverId: Int): Int
+    fun countAlbumsForServer(serverId: Int): Flow<Int>
 
     /** Count the albums in all servers. */
     @Query("SELECT COUNT(*) FROM albums")
-    fun countAlbumsInAllServers(): Int
+    fun countAlbumsInAllServers(): Flow<Int>
 
     /** Get all the stored albums in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId")
-    fun getAllAlbumsForServer(serverId: Int): List<AlbumEntity>
+    fun getAllAlbumsForServer(serverId: Int): Flow<List<AlbumEntity>>
 
     /** Get a single album by ID in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId AND id = :id")
@@ -41,21 +42,21 @@ interface AlbumDao {
 
     /** Get potentially multiple albums by a name search in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId AND name LIKE :name")
-    fun searchAlbumsForServerByName(serverId: Int, name: String): List<AlbumEntity>
+    fun searchAlbumsForServerByName(serverId: Int, name: String): Flow<List<AlbumEntity>>
 
     /** Get all stored albums across all configured servers. */
     @Query("SELECT * FROM albums")
-    fun getAllAlbumsInAllServers(): List<AlbumEntity>
+    fun getAllAlbumsInAllServers(): Flow<List<AlbumEntity>>
 
     /** Get potentially multiple albums by a name search across all configured servers. */
     @Query("SELECT * FROM albums WHERE name LIKE :name")
-    fun searchAlbumsInAllServersByName(name: String): List<AlbumEntity>
+    fun searchAlbumsInAllServersByName(name: String): Flow<List<AlbumEntity>>
 
     /** Count the albums by a given artist in a given server. */
     @Query("SELECT COUNT(*) FROM albums WHERE serverId = :serverId AND artistId = :artistId")
-    fun countAlbumsByArtist(serverId: Int, artistId: String): Int
+    fun countAlbumsByArtist(serverId: Int, artistId: String): Flow<Int>
 
     /** Get all albums by a given artist in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId AND artistId = :artistId")
-    fun getAlbumsByArtist(serverId: Int, artistId: String): List<AlbumEntity>
+    fun getAlbumsByArtist(serverId: Int, artistId: String): Flow<List<AlbumEntity>>
 }

@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 /** The DAO for accessing artists. */
 @Dao
@@ -25,15 +26,15 @@ interface ArtistDao {
 
     /** Count the artists in a server. */
     @Query("SELECT COUNT(*) FROM artists WHERE serverId = :serverId")
-    fun countArtistsForServer(serverId: Int): Int
+    fun countArtistsForServer(serverId: Int): Flow<Int>
 
     /** Count the artists in all servers. */
     @Query("SELECT COUNT(*) FROM artists")
-    fun countArtistsInAllServers(): Int
+    fun countArtistsInAllServers(): Flow<Int>
 
     /** Get all the stored artists in a given server. */
     @Query("SELECT * FROM artists WHERE serverId = :serverId")
-    fun getAllArtistsForServer(serverId: Int): List<ArtistEntity>
+    fun getAllArtistsForServer(serverId: Int): Flow<List<ArtistEntity>>
 
     /** Get a single artist by ID in a given server. */
     @Query("SELECT * FROM artists WHERE serverId = :serverId AND id = :id")
@@ -41,13 +42,13 @@ interface ArtistDao {
 
     /** Get potentially multiple artists by a name search in a given server. */
     @Query("SELECT * FROM artists WHERE serverId = :serverId AND name LIKE :name")
-    fun searchArtistsForServerByName(serverId: Int, name: String): List<ArtistEntity>
+    fun searchArtistsForServerByName(serverId: Int, name: String): Flow<List<ArtistEntity>>
 
     /** Get all stored artists across all configured servers. */
     @Query("SELECT * FROM artists")
-    fun getAllArtistsInAllServers(): List<ArtistEntity>
+    fun getAllArtistsInAllServers(): Flow<List<ArtistEntity>>
 
     /** Get potentially multiple artists by a name search across all configured servers. */
     @Query("SELECT * FROM artists WHERE name LIKE :name")
-    fun searchArtistsInAllServersByName(name: String): List<ArtistEntity>
+    fun searchArtistsInAllServersByName(name: String): Flow<List<ArtistEntity>>
 }

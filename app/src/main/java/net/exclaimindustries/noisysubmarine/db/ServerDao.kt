@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /** The DAO for accessing configured servers. */
 @Dao
@@ -18,5 +19,5 @@ interface ServerDao {
 
     /** Get all the configured servers. */
     @Query("SELECT * FROM servers")
-    fun getAllServers():List<Server>
+    fun getAllServers(): Flow<List<Server>>
 }
