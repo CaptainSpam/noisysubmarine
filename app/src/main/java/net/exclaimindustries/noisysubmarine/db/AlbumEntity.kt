@@ -21,7 +21,7 @@ import java.util.Date
 data class AlbumEntity(
     /** Album ID as it exists on the server. */
     val id: String,
-    /** ID of the server from which this artist comes. */
+    /** ID of the server from which this album comes. */
     val serverId: Int,
     /** Name of the album. */
     val name: String,
