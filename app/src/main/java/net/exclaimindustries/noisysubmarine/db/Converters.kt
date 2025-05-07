@@ -7,13 +7,15 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 
-/**
- * Just some assorted converter classes for the database. */
+/** Just some assorted converter functions. Some of them are for the database. */
 class Converters {
     companion object {
         private const val FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
 
-        /** Static version of the ISO-to-Date converter, for convenience. */
+        /**
+         * A static ISO-8601-to-Date converter, for convenience. OpenSubsonic sure loves it some
+         * ISO 8601-formatted dates.
+         */
         @SuppressLint("SimpleDateFormat")
         fun convertIso8601ToDate(iso: String): Date {
             // This should be static, but I understand there to have been a bug in the past with
@@ -23,20 +25,15 @@ class Converters {
         }
     }
 
-    /** Convert from an ISO 8601 string to a Date object. */
+    /** Convert from millis-since-the-epoch to a Date object. */
     @SuppressLint("SimpleDateFormat")
     @TypeConverter
-    fun fromIso8601String(iso: String): Date {
-        return convertIso8601ToDate(iso)
-    }
+    fun fromIso8601String(millis: Long): Date = Date(millis)
 
-    /** Convert from a Date object to an ISO 8601 string. */
+    /** Convert from a Date object to millis-since-the-epoch. */
     @SuppressLint("SimpleDateFormat")
     @TypeConverter
-    fun dateToIso8601(date: Date): String {
-        val df: DateFormat = SimpleDateFormat(FORMAT_STRING)
-        return df.format(date)
-    }
+    fun dateToIso8601(date: Date): Long = date.time
 
     /** Convert from a JSON-encoded list of strings to a List<String>. */
     @TypeConverter
