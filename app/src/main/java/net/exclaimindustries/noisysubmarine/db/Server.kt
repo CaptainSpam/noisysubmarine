@@ -3,6 +3,7 @@ package net.exclaimindustries.noisysubmarine.db
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.Date
 
 /**
  * A server, complete with data needed to identify it and any server-specific options.  This data
@@ -33,4 +34,10 @@ data class Server(
     val password: String?,
     /** The api key for the server.  Should be null if this server uses a username/password. */
     val apiKey: String?,
+    /**
+     * The last time the local database was synced with the remote.  Will be null if there hasn't
+     * been a sync yet.  If I ever find a "give me all changes since X date" function in
+     * OpenSubsonic, this will sure be useful.
+     */
+    val lastSynced: Date?
 )
