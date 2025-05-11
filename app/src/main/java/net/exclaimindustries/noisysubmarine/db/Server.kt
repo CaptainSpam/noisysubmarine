@@ -39,5 +39,7 @@ data class Server(
      * been a sync yet.  If I ever find a "give me all changes since X date" function in
      * OpenSubsonic, this will sure be useful.
      */
-    val lastSynced: Date?
+    val lastSynced: Date?,
+    /** The color used to represent this server. */
+    val color: ServerColor,
 )
