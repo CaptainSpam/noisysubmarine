@@ -59,4 +59,8 @@ interface AlbumDao {
     /** Get all albums by a given artist in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId AND artistId = :artistId")
     fun getAlbumsByArtist(serverId: Int, artistId: String): Flow<List<AlbumEntity>>
+
+    /** Sets the persist flag on an album. */
+    @Query("UPDATE songs SET persisted = :flag WHERE serverId = :serverId AND id = :albumId")
+    fun persistAlbum(serverId: Int, albumId: String, flag: Boolean)
 }

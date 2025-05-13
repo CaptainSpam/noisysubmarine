@@ -52,4 +52,16 @@ data class AlbumEntity(
     val sortName: String?,
     /** The explicitness of the album. */
     val explicitStatus: ExplicitStatus,
+
+    /**
+     * Whether or not this album is persisted locally.  That is, if true, all songs in this album
+     * will be downloaded to the device at any opportunity and will not be cleaned up when trying to
+     * claw back space.  This overrides the persisted flags on any songs in the album, and will
+     * persist them even if their flags are set to false.  Note that this being false does not mean
+     * this album WON'T be persisted; if its containing artist is persisted, it will still be
+     * persisted.
+     *
+     * Obviously, this doesn't exist in OpenSubsonic and isn't preserved by the remote server.
+     */
+    val persisted: Boolean,
 )

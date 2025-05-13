@@ -67,4 +67,8 @@ interface SongDao {
     /** Get all songs in a given album in a given server. */
     @Query("SELECT * FROM songs WHERE serverId = :serverId AND albumId = :albumId")
     fun getSongsInAlbum(serverId: Int, albumId: String): Flow<List<SongEntity>>
+
+    /** Sets the persist flag on a song. */
+    @Query("UPDATE songs SET persisted = :flag WHERE serverId = :serverId AND id = :songId")
+    fun persistSong(serverId: Int, songId: String, flag: Boolean)
 }
