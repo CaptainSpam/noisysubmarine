@@ -72,3 +72,30 @@ fun getServerColor(input: ServerColor): Int =
         ServerColor.LIGHT_GRAY -> Color.LTGRAY
         ServerColor.WHITE -> Color.WHITE
     }
+
+/**
+ * Returns whether an icon displayed against this ServerColor should use a light color (false) or a
+ * dark color (true).
+ */
+fun usesDarkIconColor(color: ServerColor): Boolean =
+    when(color) {
+        ServerColor.BLUE,
+        ServerColor.RED,
+        ServerColor.GREEN,
+        ServerColor.YELLOW,
+        ServerColor.CYAN,
+        ServerColor.MAGENTA,
+        ServerColor.ORANGE,
+        ServerColor.BLACK,
+        ServerColor.GRAY -> false
+
+        ServerColor.LIGHT_BLUE,
+        ServerColor.LIGHT_RED,
+        ServerColor.LIGHT_GREEN,
+        ServerColor.LIGHT_YELLOW,
+        ServerColor.LIGHT_CYAN,
+        ServerColor.LIGHT_MAGENTA,
+        ServerColor.LIGHT_ORANGE,
+        ServerColor.LIGHT_GRAY,
+        ServerColor.WHITE -> true
+    }

@@ -42,4 +42,11 @@ data class Server(
     val lastSynced: Date?,
     /** The color used to represent this server. */
     val color: ServerColor,
+    /**
+     * The icon used to represent this server.  If this is anything other than NONE, this icon gets
+     * drawn into areas where a server's color is placed, to help with users who may have a hard
+     * time telling colors apart (and have multiple servers configured).  Or, y'know, if a user just
+     * wants one of these icons in the interface.
+     */
+    val icon: ServerIcon,
 )
