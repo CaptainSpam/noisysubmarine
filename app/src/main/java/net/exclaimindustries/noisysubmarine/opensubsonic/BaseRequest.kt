@@ -38,7 +38,7 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
 
         // Add the endpoint path.  Everything should be under /rest, with the endpoint name given by
         // implementation.
-        builder.appendPath("rest").appendPath(getEndpoint())
+        builder.appendPath("rest").appendPath(endpoint)
 
         // The common base stuff.
         builder.appendQueryParameter("v", protocol)
@@ -52,8 +52,8 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
         return builder
     }
 
-    /** Gets the endpoint name.  This should be a simple name, without "rest" before it. */
-    protected abstract fun getEndpoint(): String
+    /** The endpoint name.  This should be a simple name, without "rest" before it. */
+    protected abstract val endpoint: String
 
     /**
      * Executes the request.
