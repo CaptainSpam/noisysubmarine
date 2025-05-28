@@ -2,6 +2,7 @@ package net.exclaimindustries.noisysubmarine.opensubsonic
 
 import android.net.Uri
 import android.util.Log
+import net.exclaimindustries.noisysubmarine.db.Server
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -62,12 +63,9 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
      * The base data for any call to an OpenSubsonic server.  This should be extended for most
      * requests, except maybe ping.
      *
-     * @param server the base server Uri.  In general, this should just include the scheme, server,
-     *               and port; all path info will be added by concrete implementations of
-     *               BaseRequest
-     * @param loginData the login data
+     * @param server the base Server object
      */
-    data class BaseRequestData(val server: Uri, val loginData: LoginData)
+    data class BaseRequestData(val server: Server)
 
     /**
      * The Subsonic protocol.  Since this part of the protocol is based on the original Subsonic,
@@ -88,7 +86,7 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
      * client name, login data, etc) should be added to the result.
      */
     protected fun makeBaseUriBuilder(): Uri.Builder {
-        val builder = requestData.server.buildUpon()
+        val builder = requestData.server.uri.buildUpon()
 
         // Add the endpoint path.  Everything should be under /rest, with the endpoint name given by
         // implementation.
@@ -100,7 +98,7 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
         builder.appendQueryParameter("f", "json")
 
         // Add in the login data.
-        requestData.loginData.addHttpParamsTo(builder)
+        LoginData.makeLoginDataForServer(requestData.server).addHttpParamsTo(builder)
 
         // Ready to go!
         return builder

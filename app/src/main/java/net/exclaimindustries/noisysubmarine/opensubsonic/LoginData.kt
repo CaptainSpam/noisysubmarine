@@ -1,6 +1,7 @@
 package net.exclaimindustries.noisysubmarine.opensubsonic
 
 import android.net.Uri
+import net.exclaimindustries.noisysubmarine.db.Server
 import net.exclaimindustries.tools.MD5Tools
 import java.security.SecureRandom
 
@@ -9,6 +10,17 @@ import java.security.SecureRandom
  * in any REST call to add the appropriate params for login.
  */
 abstract class LoginData {
+    companion object {
+        fun makeLoginDataForServer(server: Server): LoginData {
+            return if (server.username !== null && server.password !== null && server.apiKey === null)
+                SaltedPassword(server.username, server.password)
+            else if (server.apiKey !== null && server.username === null && server.password === null)
+                ApiKey(server.apiKey)
+            else
+                throw IllegalStateException("Server somehow has illegal login data (apiKey=${server.apiKey ?: "(null)"}, username=${server.username ?: "(null)"}, password=${if (server.password !== null) "(defined)" else "(null)"}")
+        }
+    }
+
     /**
      * Adds HTTP params relevant to this LoginData to the given builder.  For instance, for salted
      * logins, this will generate salt, MD5 the password into it, and add both params (plus the
