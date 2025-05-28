@@ -27,29 +27,35 @@ class PingRequest(requestData: BaseRequestData) : BaseRequest(requestData) {
     fun execute(): BaseOpenSubsonicResponse {
         val uri = makeBaseUriBuilder().build()
 
-        // Crack it open and let's go!
-        val connection = URL(uri.toString()).openConnection() as HttpURLConnection
-        connection.connect()
+        var connection: HttpURLConnection? = null
 
-        lastResponseCode = connection.responseCode
-        if (lastResponseCode != 200) {
-            Log.e(DEBUG_TAG, "Error response from server: $lastResponseCode")
-            // Something else will get whatever happened here.
-            throw IOException("Error response from server: $lastResponseCode")
+        try {
+            // Crack it open and let's go!
+            connection = URL(uri.toString()).openConnection() as HttpURLConnection
+            connection.connect()
+
+            lastResponseCode = connection.responseCode
+            if (lastResponseCode != 200) {
+                Log.e(DEBUG_TAG, "Error response from server: $lastResponseCode")
+                // Something else will get whatever happened here.
+                throw IOException("Error response from server: $lastResponseCode")
+            }
+
+            // Hoover up that data!
+            val br = BufferedReader(InputStreamReader(connection.inputStream))
+            val buffer = StringBuffer()
+            var line: String? = br.readLine()
+            while (line != null) {
+                buffer.append(line)
+                line = br.readLine()
+            }
+
+            // With any luck, this should be a JSON blob.  If not, well, we've got an exception to
+            // catch.
+            val json = JSONObject(br.toString())
+            return throwOnError(extractBaseResponse(json))
+        } finally {
+            connection?.disconnect()
         }
-
-        // Hoover up that data!
-        val br = BufferedReader(InputStreamReader(connection.inputStream))
-        val buffer = StringBuffer()
-        var line: String? = br.readLine()
-        while (line != null) {
-            buffer.append(line)
-            line = br.readLine()
-        }
-
-        // With any luck, this should be a JSON blob.  If not, well, we've got an exception to
-        // catch.
-        val json = JSONObject(br.toString())
-        return throwOnError(extractBaseResponse(json))
     }
 }
