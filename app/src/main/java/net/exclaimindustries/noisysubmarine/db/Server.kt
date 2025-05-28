@@ -50,4 +50,10 @@ data class Server(
      * wants one of these icons in the interface.
      */
     val icon: ServerIcon,
-)
+) {
+    override fun toString(): String {
+        // Overriding this so as not to display the password or API key in logs.  It's called being
+        // responsible.
+        return "Server(uri=$uri, name=$name, username=$username, password=${if(password !== null) "(defined)" else "null"}, apiKey=${if(apiKey !== null) "(defined)" else "null"}, lastSynced=$lastSynced, color=$color, icon=$icon)"
+    }
+}

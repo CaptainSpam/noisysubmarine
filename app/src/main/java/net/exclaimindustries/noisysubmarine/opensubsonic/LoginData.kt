@@ -17,7 +17,7 @@ abstract class LoginData {
             else if (server.apiKey !== null && server.username === null && server.password === null)
                 ApiKey(server.apiKey)
             else
-                throw IllegalStateException("Server somehow has illegal login data (apiKey=${server.apiKey ?: "(null)"}, username=${server.username ?: "(null)"}, password=${if (server.password !== null) "(defined)" else "(null)"}")
+                throw IllegalStateException("Server somehow has illegal login data: $server")
         }
     }
 
