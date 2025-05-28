@@ -1,5 +1,6 @@
 package net.exclaimindustries.noisysubmarine.db
 
+import android.net.Uri
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -17,12 +18,12 @@ data class Server(
     /** Server ID (automatic). */
     @PrimaryKey(autoGenerate = true) val id: Int,
     /**
-     * The base URL of the server.  This should generally just be the scheme, server, and port,
+     * The base URI of the server.  This should generally just be the scheme, server, and port,
      * without any endpoints or the "rest" path (though some servers may require more of a path
      * before it gets to "rest" anyway).  That is, something like "http://server.net:5000",
-     * NOT "http://server.net:5000/rest".
+     * NOT "http://server.net:5000/rest"; the endpoints and params will be added to this.
      */
-    val url: String,
+    val uri: Uri,
     /** The server's human-friendly name. */
     val name: String,
     /** The username to log into the server.  Should be null if this server uses api keys. */

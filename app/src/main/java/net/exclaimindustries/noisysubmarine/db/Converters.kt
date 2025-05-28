@@ -1,11 +1,13 @@
 package net.exclaimindustries.noisysubmarine.db
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.room.TypeConverter
 import org.json.JSONArray
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import androidx.core.net.toUri
 
 /** Just some assorted converter functions. Some of them are for the database. */
 class Converters {
@@ -58,4 +60,20 @@ class Converters {
 
         return jsonArray.toString()
     }
+
+    /**
+     * Convert from a string into a Uri.  Note that this assumes the string is a valid URI, or in
+     * other words, that the database never gets corrupted URI strings in it.  Of course, if that
+     * happens, we've got far worse issues on our hands, but it will still likely throw exceptions
+     * that won't get caught.
+     */
+    @TypeConverter
+    fun fromStringToUri(uri: String): Uri = uri.toUri()
+
+    /**
+     * Convert from a Uri into a string.  Which, all said, is really just calling toString on the
+     * Uri.
+     */
+    @TypeConverter
+    fun uriToString(uri: Uri): String = uri.toString()
 }
