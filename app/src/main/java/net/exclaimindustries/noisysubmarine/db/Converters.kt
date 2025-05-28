@@ -28,12 +28,10 @@ class Converters {
     }
 
     /** Convert from millis-since-the-epoch to a Date object. */
-    @SuppressLint("SimpleDateFormat")
     @TypeConverter
-    fun fromIso8601String(millis: Long): Date = Date(millis)
+    fun fromMillisToDate(millis: Long): Date = Date(millis)
 
     /** Convert from a Date object to millis-since-the-epoch. */
-    @SuppressLint("SimpleDateFormat")
     @TypeConverter
     fun dateToIso8601(date: Date): Long = date.time
 
