@@ -5,6 +5,11 @@ import android.util.Log
 import net.exclaimindustries.noisysubmarine.db.Server
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 /** The base of any call to an OpenSubsonic server. */
 abstract class BaseRequest(val requestData: BaseRequestData) {
@@ -45,17 +50,17 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
         }
 
         /**
-         * Checks for an error in a response and throws an OpenSubsonicException if there is one.
-         * Otherwise, returns the input response.
+         * Checks for an error in a response and throws an `OpenSubsonicException` if there is one.
+         * Does nothing otherwise.
          */
         @JvmStatic
-        protected fun throwOnError(response: BaseOpenSubsonicResponse): BaseOpenSubsonicResponse {
+        protected fun throwOnError(json: JSONObject) {
+            val response = extractBaseResponse(json)
+
             if (response.error != null) {
                 Log.e(DEBUG_TAG, "Error in response: $response")
                 throw OpenSubsonicException(response.error)
             }
-
-            return response
         }
     }
 
@@ -88,8 +93,8 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
     private var lastResponseCode: Int? = null
 
     /**
-     * Set the last response code received by an HttpURLConnection attempt.  This is generally only
-     * useful if said response isn't 200, but set it on each connection anyway.
+     * Set the last response code received by an `HttpURLConnection` attempt.  This is generally
+     * only useful if said response isn't 200, but set it on each connection anyway.
      *
      * @param code the last-seen code
      */
@@ -105,7 +110,7 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
     fun getLastResponseCode(): Int? = lastResponseCode
 
     /**
-     * Creates a new Uri.Builder with the appropriate base data.  This should be the first step in
+     * Creates a new `Uri.Builder` with the appropriate base data.  This should be the first step in
      * handling the request, and any request-specific params (that is, NOT the protocol version,
      * client name, login data, etc) should be added to the result.
      */
@@ -127,6 +132,56 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
         // Ready to go!
         return builder
     }
+
+    /**
+     * Takes the base `Uri`, staples any needed params on it, connects, treats the entire response
+     * as a `JSONObject`, and, assuming nothing went wrong that whole way, returns as such.
+     */
+    protected fun fetchDataAsJsonObject(): JSONObject {
+        // Build the Uri.
+        val uri = addParams(makeBaseUriBuilder()).build()
+
+        var connection: HttpURLConnection? = null
+
+        try {
+            // Crack it open and let's go!
+            connection = URL(uri.toString()).openConnection() as HttpURLConnection
+            connection.connect()
+
+            setLastResponseCode(connection.responseCode)
+            if (lastResponseCode != 200) {
+                Log.e(DEBUG_TAG, "Error response from server: $lastResponseCode")
+                // Something else will get whatever happened here.
+                throw IOException("Error response from server: $lastResponseCode")
+            }
+
+            // Hoover up that data!
+            val br = BufferedReader(InputStreamReader(connection.inputStream))
+            val buffer = StringBuffer()
+            var line: String? = br.readLine()
+            while (line != null) {
+                buffer.append(line)
+                line = br.readLine()
+            }
+
+            // With any luck, this should be a JSON blob.  If not, well, we've got an exception to
+            // catch.
+            val json = JSONObject(br.toString())
+            throwOnError(json)
+
+            return json
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    /**
+     * Adds implementation-specific params to the given `Uri.Builder`.
+     *
+     * @param builder the input builder to modify
+     * @return the same builder
+     */
+    protected abstract fun addParams(builder: Uri.Builder): Uri.Builder
 
     /** The endpoint name.  This should be a simple name, without "rest" before it. */
     protected abstract val endpoint: String
