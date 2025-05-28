@@ -81,6 +81,30 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
     private val client = "Noisy Submarine"
 
     /**
+     * The last-seen HTTP response code.  This is private so it can't be messed with outside of
+     * `setLastResponseCode()`, which in turn is protected so outside callers can't mess with it
+     * either.
+     */
+    private var lastResponseCode: Int? = null
+
+    /**
+     * Set the last response code received by an HttpURLConnection attempt.  This is generally only
+     * useful if said response isn't 200, but set it on each connection anyway.
+     *
+     * @param code the last-seen code
+     */
+    protected fun setLastResponseCode(code: Int) { lastResponseCode = code }
+
+    /**
+     * Gets the response code received by the last connection attempt.  If all went well, this will
+     * be 200.  If a connection error occurred, this won't be 200, and an exception was likely
+     * thrown (which is probably why you're checking this method to begin with).  If no HTTP
+     * connection could be made (i.e. an IOException happened before connecting or the request had
+     * not been initiated yet), this will be null.
+     */
+    fun getLastResponseCode(): Int? = lastResponseCode
+
+    /**
      * Creates a new Uri.Builder with the appropriate base data.  This should be the first step in
      * handling the request, and any request-specific params (that is, NOT the protocol version,
      * client name, login data, etc) should be added to the result.

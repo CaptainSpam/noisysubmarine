@@ -34,7 +34,7 @@ class PingRequest(requestData: BaseRequestData) : BaseRequest(requestData) {
             connection = URL(uri.toString()).openConnection() as HttpURLConnection
             connection.connect()
 
-            lastResponseCode = connection.responseCode
+            setLastResponseCode(connection.responseCode)
             if (lastResponseCode != 200) {
                 Log.e(DEBUG_TAG, "Error response from server: $lastResponseCode")
                 // Something else will get whatever happened here.
