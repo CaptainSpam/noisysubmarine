@@ -6,7 +6,7 @@ package net.exclaimindustries.noisysubmarine.opensubsonic
 class PingRequest(requestData: BaseRequestData): BaseRequest(requestData) {
     override val endpoint: String = "ping"
 
-    override fun execute() {
+    fun execute() {
         val builder = makeBaseUriBuilder()
 
         // Okay, now do something with it.
