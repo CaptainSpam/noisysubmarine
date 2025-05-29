@@ -12,7 +12,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** The base of any call to an OpenSubsonic server. */
-abstract class BaseRequest(val requestData: BaseRequestData) {
+abstract class BaseRequest(open val requestData: BaseRequestData) {
     companion object {
         private const val DEBUG_TAG = "BaseRequest"
 
@@ -70,7 +70,9 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
      *
      * @param server the base Server object
      */
-    data class BaseRequestData(val server: Server)
+    open class BaseRequestData(val server: Server) {
+        override fun toString(): String = "BaseRequestData(server=$server)"
+    }
 
     /**
      * The Subsonic protocol.  Since this part of the protocol is based on the original Subsonic,
@@ -135,7 +137,10 @@ abstract class BaseRequest(val requestData: BaseRequestData) {
 
     /**
      * Takes the base `Uri`, staples any needed params on it, connects, treats the entire response
-     * as a `JSONObject`, and, assuming nothing went wrong that whole way, returns as such.
+     * as a `JSONObject`, and, assuming nothing went wrong that whole way, returns as such.  Note
+     * that this returns the ENTIRE object; you'll most likely want to dig into the
+     * `subsonic-response` object first (though if you're calling `extractBaseResponse`, that will
+     * do that for you)
      */
     protected fun fetchDataAsJsonObject(): JSONObject {
         // Build the Uri.
