@@ -125,9 +125,6 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
      * Parses an OpenSubsonic ArtistID3 object into an ArtistEntity.  This does very little error
      * checking; if the server is returning bogus data (i.e. fields that are strictly required are
      * missing), this will throw an exception.  Optional fields should be okay.
-     *
-     * Remember, the `persisted` field is just a placeholder here; if this is updating an existing
-     * entry, it needs to be changed to whatever's in the database already.
      */
     private fun parseArtist(artistJson: JSONObject): ArtistEntity =
         ArtistEntity(serverId = requestData.server.id,
@@ -137,16 +134,12 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
                      artistImageUrl = getStringOrNull(artistJson, "artistImageUrl"),
                      starred = getDateOrNull(artistJson, "starred"),
                      musicBrainzId = getStringOrNull(artistJson, "musicBrainzId"),
-                     sortName = getStringOrNull(artistJson, "sortName"),
-                     persisted = false)
+                     sortName = getStringOrNull(artistJson, "sortName"))
 
     /**
      * Parses an OpenSubsonic AlbumID3 object into an AlbumEntity.  This does very little error
      * checking; if the server is returning bogus data (i.e. fields that are strictly required are
      * missing), this will throw an exception.  Optional fields should be okay.
-     *
-     * Remember, the `persisted` field is just a placeholder here; if this is updating an existing
-     * entry, it needs to be changed to whatever's in the database already.
      */
     private fun parseAlbum(albumJson: JSONObject): AlbumEntity {
         // Genres need to be handled weirdly.
@@ -181,7 +174,6 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
                            sortName = getStringOrNull(albumJson, "sortName"),
                            explicitStatus = ExplicitStatus.valueOf(albumJson.optString("explicitStatus",
                                                                                        "")),
-                           persisted = false
         )
     }
 
@@ -189,9 +181,6 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
      * Parses an OpenSubsonic Child object into a SongEntity.  This does very little error checking;
      * if the server is returning bogus data (i.e. fields that are strictly required are missing),
      * this will throw an exception.  Optional fields should be okay.
-     *
-     * Remember, the `persisted` field is just a placeholder here; if this is updating an existing
-     * entry, it needs to be changed to whatever's in the database already.
      */
     private fun parseSong(songJson: JSONObject): SongEntity {
         // Genres need to be handled weirdly.
@@ -235,7 +224,6 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
                           sortName = getStringOrNull(songJson, "sortName"),
                           explicitStatus = ExplicitStatus.valueOf(songJson.optString("explicitStatus",
                                                                                      "")),
-                          persisted = false
         )
     }
 }

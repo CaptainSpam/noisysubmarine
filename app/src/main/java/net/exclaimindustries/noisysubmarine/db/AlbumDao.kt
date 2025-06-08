@@ -59,25 +59,4 @@ interface AlbumDao {
     /** Get all albums by a given artist in a given server. */
     @Query("SELECT * FROM albums WHERE serverId = :serverId AND artistId = :artistId")
     fun getAlbumsByArtist(serverId: Int, artistId: String): Flow<List<AlbumEntity>>
-
-    /** Sets the persist flag on an album. */
-    @Query("UPDATE songs SET persisted = :flag WHERE serverId = :serverId AND id = :albumId")
-    fun persistAlbum(serverId: Int, albumId: String, flag: Boolean)
-
-    /**
-     * Returns whether or not a given album is transitively persisted.  This will NOT return true if
-     * the album is only DIRECTLY persisted but not TRANSITIVELY persisted; this is primarily for
-     * the transitively-persisted icon on an album entry UI element (that is, an icon that shows the
-     * album is persisted, but directly un-persisting it won't change this fact).
-     */
-    @Query("SELECT IIF(COUNT(*), 1, 0) FROM (SELECT artists.persisted FROM artists, albums WHERE albums.id=:albumId AND albums.serverId=:serverId AND artists.serverId=:serverId AND albums.artistId=artists.id AND artists.persisted=1)")
-    fun isAlbumStrictlyTransitivelyPersisted(serverId: Int, albumId: String): Flow<Boolean>
-
-    /**
-     * Returns whether or not a given album is persisted, transitively or not.  This is for album
-     * fetching purposes.  I think.  Actually, this one might go away, given you don't fetch albums,
-     * you fetch *songs* in an album.
-     */
-    @Query("SELECT IIF(artistPersist OR albumPersist, 1, 0) FROM (SELECT COUNT(*) AS artistPersist FROM (SELECT artists.persisted FROM artists, albums WHERE albums.id=:albumId AND albums.serverId=:serverId AND artists.serverId=:serverId AND albums.artistId=artists.id AND artists.persisted=1)), (SELECT COUNT(*) AS albumPersist FROM albums WHERE albums.id=:albumId AND albums.serverId=:serverId AND albums.persisted=1)")
-    fun isAlbumTransitivelyPersisted(serverId: Int, albumId: String): Flow<Boolean>
 }

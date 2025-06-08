@@ -51,8 +51,4 @@ interface ArtistDao {
     /** Get potentially multiple artists by a name search across all configured servers. */
     @Query("SELECT * FROM artists WHERE name LIKE :name")
     fun searchArtistsInAllServersByName(name: String): Flow<List<ArtistEntity>>
-
-    /** Sets the persist flag on an artist. */
-    @Query("UPDATE artists SET persisted = :flag WHERE serverId = :serverId AND id = :artistId")
-    fun persistArtist(serverId: Int, artistId: String, flag: Boolean)
 }

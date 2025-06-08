@@ -70,14 +70,4 @@ data class SongEntity(
     val sortName: String?,
     /** The explicitness of the song. */
     val explicitStatus: ExplicitStatus,
-
-    /**
-     * Whether or not this song is persisted locally.  That is, if true, this song will be
-     * downloaded to the device at any opportunity and will not be cleaned up when trying to claw
-     * back space.  Note that this being false does not mean the song WON'T be persisted; if its
-     * containing album or artist are persisted, it will still be persisted.
-     *
-     * Obviously, this doesn't exist in OpenSubsonic and isn't preserved by the remote server.
-     */
-    val persisted: Boolean,
 )

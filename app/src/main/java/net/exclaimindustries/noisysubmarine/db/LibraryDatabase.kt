@@ -35,4 +35,5 @@ abstract class LibraryDatabase: RoomDatabase() {
     abstract fun artistDao(): ArtistDao
     abstract fun albumDao(): AlbumDao
     abstract fun songDao(): SongDao
+    abstract fun persistenceDao(): PersistenceDao
 }
