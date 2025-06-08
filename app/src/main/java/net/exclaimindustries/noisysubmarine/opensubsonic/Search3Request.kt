@@ -101,7 +101,8 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
             }
         }
 
-        Log.d(DEBUG_TAG, "Done.  Artists: ${artists.size}; Albums: ${albums.size}; Songs: ${songs.size}")
+        Log.d(DEBUG_TAG,
+              "Done.  Artists: ${artists.size}; Albums: ${albums.size}; Songs: ${songs.size}")
         return Search3ResponseData(artists = artists, albums = albums, songs = songs)
     }
 
@@ -120,6 +121,30 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
     /** Convenience function because optString doesn't allow for nulls as the fallback. */
     private fun getDateOrNull(jsonObj: JSONObject, field: String): Date? =
         if (jsonObj.has(field)) Converters.convertIso8601ToDate(jsonObj.getString(field)) else null
+
+    /**
+     * Extract a list of genres from either an album or a song.  The normal Subsonic protocol only
+     * allows for a single genre for each album/song, but OpenSubsonic allows for multiple.  Since
+     * a server can return both, we combine them here, prioritizing the singular genre.
+     */
+    private fun getGenres(jsonObj: JSONObject): List<String> {
+        val genres = HashSet<String>()
+
+        // First, the singular genre, if it exists.
+        if (jsonObj.has("genre")) genres.add(jsonObj.getString("genre"))
+
+        // Then, the plural genres, if they exist.
+        try {
+            val genreJson = jsonObj.getJSONArray("genres")
+            for (i in 0..genreJson.length() - 1) {
+                genres.add(genreJson.getString(i))
+            }
+        } catch (_: JSONException) {
+            // Ignore this, there's no genres (plural).
+        }
+
+        return genres.toList()
+    }
 
     /**
      * Parses an OpenSubsonic ArtistID3 object into an ArtistEntity.  This does very little error
@@ -141,89 +166,57 @@ class Search3Request(override val requestData: Search3RequestData) : BaseRequest
      * checking; if the server is returning bogus data (i.e. fields that are strictly required are
      * missing), this will throw an exception.  Optional fields should be okay.
      */
-    private fun parseAlbum(albumJson: JSONObject): AlbumEntity {
-        // Genres need to be handled weirdly.
-        val genres = HashSet<String>()
-
-        // First, the singular genre, if it exists.
-        if (albumJson.has("genre")) genres.add(albumJson.getString("genre"))
-
-        // Then, the plural genres, if they exist.
-        try {
-            val genreJson = albumJson.getJSONArray("genres")
-            for (i in 0..genreJson.length() - 1) {
-                genres.add(genreJson.getString(i))
-            }
-        } catch (_: JSONException) {
-            // Ignore this, there's no genres (plural).
-        }
-
-        return AlbumEntity(serverId = requestData.server.id,
-                           id = albumJson.getString("id"),
-                           name = albumJson.getString("name"),
-                           artistId = getStringOrNull(albumJson, "artistId"),
-                           coverArt = getStringOrNull(albumJson, "coverArt"),
-                           duration = albumJson.getInt("duration"),
-                           playCount = getLongOrNull(albumJson, "playCount"),
-                           created = Converters.convertIso8601ToDate(albumJson.getString("created")),
-                           starred = getDateOrNull(albumJson, "starred"),
-                           year = getIntOrNull(albumJson, "year"),
-                           genres = genres.toList(),
-                           musicBrainzId = getStringOrNull(albumJson, "musicBrainzId"),
-                           displayArtist = getStringOrNull(albumJson, "displayArtist"),
-                           sortName = getStringOrNull(albumJson, "sortName"),
-                           explicitStatus = ExplicitStatus.valueOf(albumJson.optString("explicitStatus",
-                                                                                       "")),
+    private fun parseAlbum(albumJson: JSONObject): AlbumEntity =
+        AlbumEntity(
+                serverId = requestData.server.id,
+                id = albumJson.getString("id"),
+                name = albumJson.getString("name"),
+                artistId = getStringOrNull(albumJson, "artistId"),
+                coverArt = getStringOrNull(albumJson, "coverArt"),
+                duration = albumJson.getInt("duration"),
+                playCount = getLongOrNull(albumJson, "playCount"),
+                created = Converters.convertIso8601ToDate(albumJson.getString("created")),
+                starred = getDateOrNull(albumJson, "starred"),
+                year = getIntOrNull(albumJson, "year"),
+                genres = getGenres(albumJson),
+                musicBrainzId = getStringOrNull(albumJson, "musicBrainzId"),
+                displayArtist = getStringOrNull(albumJson, "displayArtist"),
+                sortName = getStringOrNull(albumJson, "sortName"),
+                explicitStatus = ExplicitStatus.valueOf(albumJson.optString("explicitStatus",
+                                                                            "")),
         )
-    }
 
     /**
      * Parses an OpenSubsonic Child object into a SongEntity.  This does very little error checking;
      * if the server is returning bogus data (i.e. fields that are strictly required are missing),
      * this will throw an exception.  Optional fields should be okay.
      */
-    private fun parseSong(songJson: JSONObject): SongEntity {
-        // Genres need to be handled weirdly.
-        val genres = HashSet<String>()
-
-        // First, the singular genre, if it exists.
-        if (songJson.has("genre")) genres.add(songJson.getString("genre"))
-
-        // Then, the plural genres, if they exist.
-        try {
-            val genreJson = songJson.getJSONArray("genres")
-            for (i in 0..genreJson.length() - 1) {
-                genres.add(genreJson.getString(i))
-            }
-        } catch (_: JSONException) {
-            // Ignore this, there's no genres (plural).
-        }
-
-        return SongEntity(serverId = requestData.server.id,
-                          id = songJson.getString("id"),
-                          title = songJson.getString("title"),
-                          albumId = getStringOrNull(songJson, "albumId"),
-                          artistId = getStringOrNull(songJson, "artistId"),
-                          track = getIntOrNull(songJson, "track"),
-                          coverArt = getStringOrNull(songJson, "coverArt"),
-                          size = songJson.getInt("size"),
-                          contentType = getStringOrNull(songJson, "contentType"),
-                          suffix = getStringOrNull(songJson, "suffix"),
-                          duration = songJson.getInt("duration"),
-                          bitRate = getIntOrNull(songJson, "bitRate"),
-                          bitDepth = getIntOrNull(songJson, "bitDepth"),
-                          samplingRate = getIntOrNull(songJson, "samplingRate"),
-                          channelCount = getIntOrNull(songJson, "channelCount"),
-                          playCount = getLongOrNull(songJson, "playCount"),
-                          discNumber = getIntOrNull(songJson, "discNumber"),
-                          created = Converters.convertIso8601ToDate(songJson.getString("created")),
-                          starred = getDateOrNull(songJson, "starred"),
-                          comment = getStringOrNull(songJson, "comment"),
-                          genres = genres.toList(),
-                          musicBrainzId = getStringOrNull(songJson, "musicBrainzId"),
-                          sortName = getStringOrNull(songJson, "sortName"),
-                          explicitStatus = ExplicitStatus.valueOf(songJson.optString("explicitStatus",
-                                                                                     "")),
+    private fun parseSong(songJson: JSONObject): SongEntity =
+        SongEntity(
+                serverId = requestData.server.id,
+                id = songJson.getString("id"),
+                title = songJson.getString("title"),
+                albumId = getStringOrNull(songJson, "albumId"),
+                artistId = getStringOrNull(songJson, "artistId"),
+                track = getIntOrNull(songJson, "track"),
+                coverArt = getStringOrNull(songJson, "coverArt"),
+                size = songJson.getInt("size"),
+                contentType = getStringOrNull(songJson, "contentType"),
+                suffix = getStringOrNull(songJson, "suffix"),
+                duration = songJson.getInt("duration"),
+                bitRate = getIntOrNull(songJson, "bitRate"),
+                bitDepth = getIntOrNull(songJson, "bitDepth"),
+                samplingRate = getIntOrNull(songJson, "samplingRate"),
+                channelCount = getIntOrNull(songJson, "channelCount"),
+                playCount = getLongOrNull(songJson, "playCount"),
+                discNumber = getIntOrNull(songJson, "discNumber"),
+                created = Converters.convertIso8601ToDate(songJson.getString("created")),
+                starred = getDateOrNull(songJson, "starred"),
+                comment = getStringOrNull(songJson, "comment"),
+                genres = getGenres(songJson),
+                musicBrainzId = getStringOrNull(songJson, "musicBrainzId"),
+                sortName = getStringOrNull(songJson, "sortName"),
+                explicitStatus = ExplicitStatus.valueOf(songJson.optString("explicitStatus",
+                                                                           "")),
         )
-    }
 }
